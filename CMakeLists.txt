@@ -5,7 +5,7 @@ include(CTest)
 enable_testing()
 
 set(SO_SOURCES src/error.c src/resource.c)
-add_library(so SHARED ${SO_SOURCES})
+add_library(so STATIC ${SO_SOURCES})
 
 target_compile_options(so PRIVATE -Wall -Wextra -fPIC)
 target_include_directories(so PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
