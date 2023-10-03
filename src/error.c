@@ -5,8 +5,6 @@
 
 static void	err_doit(int, const char *, va_list);
 
-char	*pname = NULL;		/* caller can set this from argv[0] */
-
 /* Non fatal error related to a system call.
  * Print a message and return. */
 
