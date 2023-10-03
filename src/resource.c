@@ -17,7 +17,8 @@ struct timeb g_TStart, g_TStop;
 struct rusage *g_RStart = NULL, *g_RStop = NULL;
 struct rusage *g_RChildrenStart = NULL, *g_RChildrenStop = NULL;
 struct rusage *g_RThreadStart = NULL, *g_RThreadStop = NULL;
-short  countingStarted = FALSE, countingStopped = FALSE;
+static short countingStarted = FALSE;
+static short countingStopped = FALSE;
 
 void startCounting()
 {
