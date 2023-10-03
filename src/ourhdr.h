@@ -39,6 +39,24 @@ typedef	void	Sigfunc(int);	/* for signal handlers */
 #define	SIG_ERR	((Sigfunc *)-1)
 #endif
 
+#define print_err_func(...)					\
+    do										\
+    {										\
+        fprintf(stderr, "%s: ", __func__);	\
+        fprintf(stderr, __VA_ARGS__);		\
+    } while (0);
+
+#define print_info_func(...)				\
+    do										\
+    {										\
+        fprintf(stdout, "%s: ", __func__);	\
+        fprintf(stdout, __VA_ARGS__);		\
+    } while (0);
+
+#define print_err(...) fprintf(stderr, __VA_ARGS__);
+
+#define print_info(...) fprintf(stdout, __VA_ARGS__);
+
 #define	min(a,b)	((a) < (b) ? (a) : (b))
 #define	max(a,b)	((a) > (b) ? (a) : (b))
 

@@ -71,19 +71,19 @@ void stopCounting()
 }
 
 static void printDataFromResource(struct rusage *start,  struct rusage *stop) {
-	fprintf(stderr, "\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
-	fprintf(stderr, "Total Sys Time    : %.3f\n", TimeDiffuSec(start->ru_stime, stop->ru_stime));
-	fprintf(stderr, "Total User Time   : %.3f\n", TimeDiffuSec(start->ru_utime, stop->ru_utime));
-	fprintf(stderr, "Blocking I/O oper.: %ld (in) %ld (out)\n",
+	print_err("\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
+	print_err("Total Sys Time    : %.3f\n", TimeDiffuSec(start->ru_stime, stop->ru_stime));
+	print_err("Total User Time   : %.3f\n", TimeDiffuSec(start->ru_utime, stop->ru_utime));
+	print_err("Blocking I/O oper.: %ld (in) %ld (out)\n",
 				stop->ru_inblock - start->ru_inblock, stop->ru_oublock - start->ru_oublock);
 
-	fprintf(stderr, "Max resident size : %ld\n", stop->ru_maxrss);
-	fprintf(stderr, "Integral shared memory size: %ld\n", stop->ru_ixrss);
-	fprintf(stderr, "Integral unshared data size: %ld\n", stop->ru_idrss);
-	fprintf(stderr, "Integral unshared stack size: %ld\n", stop->ru_isrss);
-	fprintf(stderr, "Page reclaims (soft page faults): %ld\n", stop->ru_minflt);
-	fprintf(stderr, "Page faults (hard page faults): %ld\n", stop->ru_majflt);
-	fprintf(stderr, "# Swap operations: %ld\n\n", stop->ru_nswap);         /* swaps */
+	print_err("Max resident size : %ld\n", stop->ru_maxrss);
+	print_err("Integral shared memory size: %ld\n", stop->ru_ixrss);
+	print_err("Integral unshared data size: %ld\n", stop->ru_idrss);
+	print_err("Integral unshared stack size: %ld\n", stop->ru_isrss);
+	print_err("Page reclaims (soft page faults): %ld\n", stop->ru_minflt);
+	print_err("Page faults (hard page faults): %ld\n", stop->ru_majflt);
+	print_err("# Swap operations: %ld\n\n", stop->ru_nswap);         /* swaps */
 }
 
 void printResourceUsage(int who)
@@ -106,7 +106,7 @@ void printResourceUsage(int who)
 			break;
 
 		default:
-			fprintf(stderr, "\n%s: no instructions found for %d value\n", __func__, who);
+			print_err_func("no instructions found for %d value\n", who);
 			break;
 	}
 }
