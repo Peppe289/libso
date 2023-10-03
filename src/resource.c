@@ -20,11 +20,27 @@ struct rusage *g_RThreadStart = NULL, *g_RThreadStop = NULL;
 static short countingStarted = FALSE;
 static short countingStopped = FALSE;
 
+/**
+ * Replaces ftime() which is now deprecated.
+ * The use is identical.
+ */
+static void ftime_new(struct timeb *tb) {
+    struct timeval tv;
+    struct timezone tz;
+
+    gettimeofday(&tv, &tz);
+
+    tb->time = tv.tv_sec;
+    tb->millitm = tv.tv_usec / 1000;
+    tb->timezone = tz.tz_minuteswest;
+    tb->dstflag = tz.tz_dsttime;
+}
+
 void startCounting()
 {
 	countingStarted = TRUE;
 
-	ftime( &g_TStart);
+	ftime_new(&g_TStart);
 
 	if (g_RStart == NULL)
 		if ((g_RStart = malloc( sizeof(struct rusage))) == NULL)
@@ -49,7 +65,7 @@ void stopCounting()
 	if (countingStarted == TRUE) {
 		countingStopped = TRUE;
 
-		ftime( &g_TStop);
+		ftime_new(&g_TStop);
 
 		if (g_RStop == NULL)
 			if ((g_RStop = malloc( sizeof(struct rusage))) == NULL)
