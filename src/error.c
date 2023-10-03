@@ -1,16 +1,16 @@
-#include	<errno.h>		/* for definition of errno */
-#include	<stdarg.h>		/* ANSI C header file */
-#include        <limits.h>
-#include        "ourhdr.h"
+#include <errno.h>	/* for definition of errno */
+#include <stdarg.h> /* ANSI C header file */
+#include <limits.h>
+#include "ourhdr.h"
 
-static void	err_doit(int, const char *, va_list);
+static void err_doit(int, const char *, va_list);
 
 /* Non fatal error related to a system call.
  * Print a message and return. */
 
 void err_ret(const char *fmt, ...)
 {
-	va_list		ap;
+	va_list ap;
 
 	va_start(ap, fmt);
 	err_doit(1, fmt, ap);
@@ -23,7 +23,7 @@ void err_ret(const char *fmt, ...)
 
 void err_sys(const char *fmt, ...)
 {
-	va_list		ap;
+	va_list ap;
 
 	va_start(ap, fmt);
 	err_doit(1, fmt, ap);
@@ -36,13 +36,13 @@ void err_sys(const char *fmt, ...)
 
 void err_dump(const char *fmt, ...)
 {
-	va_list		ap;
+	va_list ap;
 
 	va_start(ap, fmt);
 	err_doit(1, fmt, ap);
 	va_end(ap);
-	abort();		/* dump core and terminate */
-	exit(1);		/* shouldn't get here */
+	abort(); /* dump core and terminate */
+	exit(1); /* shouldn't get here */
 }
 
 /* Nonfatal error unrelated to a system call.
@@ -50,7 +50,7 @@ void err_dump(const char *fmt, ...)
 
 void err_msg(const char *fmt, ...)
 {
-	va_list		ap;
+	va_list ap;
 
 	va_start(ap, fmt);
 	err_doit(0, fmt, ap);
@@ -63,7 +63,7 @@ void err_msg(const char *fmt, ...)
 
 void err_quit(const char *fmt, ...)
 {
-	va_list		ap;
+	va_list ap;
 
 	va_start(ap, fmt);
 	err_doit(0, fmt, ap);
@@ -76,48 +76,53 @@ void err_quit(const char *fmt, ...)
 
 static void err_doit(int errnoflag, const char *fmt, va_list ap)
 {
-	int		errno_save;
-	char	buf[MAXLINE];
+	int errno_save;
+	char buf[MAXLINE];
 
-	errno_save = errno;		/* value caller might want printed */
+	errno_save = errno; /* value caller might want printed */
 	vsprintf(buf, fmt, ap);
+
 	if (errnoflag)
-		sprintf(buf+strlen(buf), ": %s", strerror(errno_save));
+		sprintf(buf + strlen(buf), ": %s", strerror(errno_save));
+
 	strcat(buf, "\n");
-	fflush(stdout);		/* in case stdout and stderr are the same */
+	fflush(stdout); /* in case stdout and stderr are the same */
 	fputs(buf, stderr);
-	fflush(NULL);		/* flushes all stdio output streams */
+	fflush(NULL); /* flushes all stdio output streams */
 	return;
 }
 
-#ifdef  PATH_MAX
-static int      pathmax = PATH_MAX;
+#ifdef PATH_MAX
+static int pathmax = PATH_MAX;
 #else
-static int      pathmax = 0;
+static int pathmax = 0;
 #endif
 
-#define PATH_MAX_GUESS  1024    /* if PATH_MAX is indeterminate */
-                                                /* we're not guaranteed this is adequate */
+#define PATH_MAX_GUESS 1024 /* if PATH_MAX is indeterminate */
+							/* we're not guaranteed this is adequate */
 char *path_alloc(int *size)
-                                /* also return allocated size, if nonnull */
+/* also return allocated size, if nonnull */
 {
-        char    *ptr;
+	char *ptr;
 
-        if (pathmax == 0) {             /* first time through */
-                errno = 0;
-                if ( (pathmax = pathconf("/", _PC_PATH_MAX)) < 0) {
-                        if (errno == 0)
-                                pathmax = PATH_MAX_GUESS;       /* it's indeterminate */
-                        else
-                                err_sys("pathconf error for _PC_PATH_MAX");
-                } else
-                        pathmax++;              /* add one since it's relative to root */
-        }
+	if (pathmax == 0)
+	{ /* first time through */
+		errno = 0;
+		if ((pathmax = pathconf("/", _PC_PATH_MAX)) < 0)
+		{
+			if (errno == 0)
+				pathmax = PATH_MAX_GUESS; /* it's indeterminate */
+			else
+				err_sys("pathconf error for _PC_PATH_MAX");
+		}
+		else
+			pathmax++; /* add one since it's relative to root */
+	}
 
-        if ( (ptr = malloc(pathmax + 1)) == NULL)
-                err_sys("malloc error for pathname");
+	if ((ptr = malloc(pathmax + 1)) == NULL)
+		err_sys("malloc error for pathname");
 
-        if (size != NULL)
-                *size = pathmax + 1;
-        return(ptr);
+	if (size != NULL)
+		*size = pathmax + 1;
+	return (ptr);
 }
