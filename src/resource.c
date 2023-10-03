@@ -65,29 +65,29 @@ void startCounting()
 
 void stopCounting()
 {
-	if (countingStarted == TRUE)
-	{
-		countingStopped = TRUE;
+	if (countingStarted != TRUE)
+		return;
 
-		ftime_new(&g_TStop);
+	countingStopped = TRUE;
 
-		if (g_RStop == NULL)
-			if ((g_RStop = malloc(sizeof(struct rusage))) == NULL)
-				return;
-		if (g_RChildrenStop == NULL)
-			if ((g_RChildrenStop = malloc(sizeof(struct rusage))) == NULL)
-				return;
-		if (g_RThreadStop == NULL)
-			if ((g_RThreadStop = malloc(sizeof(struct rusage))) == NULL)
-				return;
+	ftime_new(&g_TStop);
 
-		if (getrusage(RUSAGE_SELF, g_RStop) < 0)
-			err_ret("Can't get final values of resource usage");
-		if (getrusage(RUSAGE_CHILDREN, g_RChildrenStop) < 0)
-			err_ret("Can't get final values of resource usage");
-		if (getrusage(RUSAGE_THREAD, g_RThreadStop) < 0) // @suppress("Symbol is not resolved")
-			err_ret("Can't get final values of resource usage");
-	}
+	if (g_RStop == NULL)
+		if ((g_RStop = malloc(sizeof(struct rusage))) == NULL)
+			return;
+	if (g_RChildrenStop == NULL)
+		if ((g_RChildrenStop = malloc(sizeof(struct rusage))) == NULL)
+			return;
+	if (g_RThreadStop == NULL)
+		if ((g_RThreadStop = malloc(sizeof(struct rusage))) == NULL)
+			return;
+
+	if (getrusage(RUSAGE_SELF, g_RStop) < 0)
+		err_ret("Can't get final values of resource usage");
+	if (getrusage(RUSAGE_CHILDREN, g_RChildrenStop) < 0)
+		err_ret("Can't get final values of resource usage");
+	if (getrusage(RUSAGE_THREAD, g_RThreadStop) < 0) // @suppress("Symbol is not resolved")
+		err_ret("Can't get final values of resource usage");
 }
 
 static void printDataFromResource(struct rusage *start, struct rusage *stop)
