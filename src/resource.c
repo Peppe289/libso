@@ -70,60 +70,45 @@ void stopCounting()
 	}
 }
 
+static void printDataFromResource(struct rusage *start,  struct rusage *stop) {
+	fprintf(stderr, "\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
+	fprintf(stderr, "Total Sys Time    : %.3f\n", TimeDiffuSec(start->ru_stime, stop->ru_stime));
+	fprintf(stderr, "Total User Time   : %.3f\n", TimeDiffuSec(start->ru_utime, stop->ru_utime));
+	fprintf(stderr, "Blocking I/O oper.: %ld (in) %ld (out)\n",
+				stop->ru_inblock - start->ru_inblock, stop->ru_oublock - start->ru_oublock);
+
+	fprintf(stderr, "Max resident size : %ld\n", stop->ru_maxrss);
+	fprintf(stderr, "Integral shared memory size: %ld\n", stop->ru_ixrss);
+	fprintf(stderr, "Integral unshared data size: %ld\n", stop->ru_idrss);
+	fprintf(stderr, "Integral unshared stack size: %ld\n", stop->ru_isrss);
+	fprintf(stderr, "Page reclaims (soft page faults): %ld\n", stop->ru_minflt);
+	fprintf(stderr, "Page faults (hard page faults): %ld\n", stop->ru_majflt);
+	fprintf(stderr, "# Swap operations: %ld\n\n", stop->ru_nswap);         /* swaps */
+}
+
 void printResourceUsage(int who)
 {
 	if (countingStopped == FALSE)
 		stopCounting();
 
-	if(who == RUSAGE_SELF){
-		 fprintf(stderr, "\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
-		 fprintf(stderr, "Total Sys Time    : %.3f\n", TimeDiffuSec(g_RStart->ru_stime, g_RStop->ru_stime));
-		 fprintf(stderr, "Total User Time   : %.3f\n", TimeDiffuSec(g_RStart->ru_utime, g_RStop->ru_utime));
-		 fprintf(stderr, "Blocking I/O oper.: %ld (in) %ld (out)\n",
-		 			g_RStop->ru_inblock-g_RStart->ru_inblock, g_RStop->ru_oublock-g_RStart->ru_oublock);
-
- 		fprintf(stderr, "Max resident size : %ld\n", g_RStop->ru_maxrss);        /*  */
- 		fprintf(stderr, "Integral shared memory size: %ld\n", g_RStop->ru_ixrss);         /* */
- 		fprintf(stderr, "Integral unshared data size: %ld\n", g_RStop->ru_idrss);         /* */
- 		fprintf(stderr, "Integral unshared stack size: %ld\n", g_RStop->ru_isrss);         /*  */
- 		fprintf(stderr, "Page reclaims (soft page faults): %ld\n", g_RStop->ru_minflt);    /*  */
- 		fprintf(stderr, "Page faults (hard page faults): %ld\n", g_RStop->ru_majflt);        /* ) */
- 		fprintf(stderr, "# Swap operations: %ld\n\n", g_RStop->ru_nswap);         /* swaps */
-
-	}
-	else if (who == RUSAGE_CHILDREN)
+	switch (who)
 	{
-		fprintf(stderr, "\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
-		fprintf(stderr, "Total Sys Time    : %.3f\n", TimeDiffuSec(g_RChildrenStart->ru_stime, g_RChildrenStop->ru_stime));
-		fprintf(stderr, "Total User Time   : %.3f\n", TimeDiffuSec(g_RChildrenStart->ru_utime, g_RChildrenStop->ru_utime));
-		fprintf(stderr, "Blocking I/O oper.: %ld (in) %ld (out)\n",
-				g_RChildrenStop->ru_inblock-g_RChildrenStart->ru_inblock, g_RChildrenStop->ru_oublock-g_RChildrenStart->ru_oublock);
+		case RUSAGE_SELF:
+			printDataFromResource(g_RStart, g_RStop);
+			break;
 
-		fprintf(stderr, "Max resident size : %ld\n", g_RChildrenStop->ru_maxrss);        /*  */
-		fprintf(stderr, "Integral shared memory size: %ld\n", g_RChildrenStop->ru_ixrss);         /* */
-		fprintf(stderr, "Integral unshared data size: %ld\n", g_RChildrenStop->ru_idrss);         /* */
-		fprintf(stderr, "Integral unshared stack size: %ld\n", g_RChildrenStop->ru_isrss);         /*  */
-		fprintf(stderr, "Page reclaims (soft page faults): %ld\n", g_RChildrenStop->ru_minflt);    /*  */
-		fprintf(stderr, "Page faults (hard page faults): %ld\n", g_RChildrenStop->ru_majflt);        /* ) */
-		fprintf(stderr, "# Swap operations: %ld\n\n", g_RChildrenStop->ru_nswap);         /* swaps */
+		case RUSAGE_CHILDREN:
+			printDataFromResource(g_RChildrenStart, g_RChildrenStop);
+			break;
+
+		case RUSAGE_THREAD: // @suppress("Symbol is not resolved")
+			printDataFromResource(g_RThreadStart, g_RThreadStop);
+			break;
+
+		default:
+			fprintf(stderr, "\n%s: no instructions found for %d value\n", __func__, who);
+			break;
 	}
-	else if (who == RUSAGE_THREAD) // @suppress("Symbol is not resolved")
-	{
-		fprintf(stderr, "\nTotal Elapsed Time: %.3f\n", TimeDiffmSec(g_TStart, g_TStop));
-		fprintf(stderr, "Total Sys Time    : %.3f\n", TimeDiffuSec(g_RThreadStart->ru_stime, g_RThreadStop->ru_stime));
-		fprintf(stderr, "Total User Time   : %.3f\n", TimeDiffuSec(g_RThreadStart->ru_utime, g_RChildrenStop->ru_utime));
-		fprintf(stderr, "Blocking I/O oper.: %ld (in) %ld (out)\n",
-				g_RThreadStop->ru_inblock-g_RThreadStart->ru_inblock, g_RThreadStop->ru_oublock-g_RThreadStart->ru_oublock);
-
-		fprintf(stderr, "Max resident size : %ld\n", g_RThreadStop->ru_maxrss);        /*  */
-		fprintf(stderr, "Integral shared memory size: %ld\n", g_RThreadStop->ru_ixrss);         /* */
-		fprintf(stderr, "Integral unshared data size: %ld\n", g_RThreadStop->ru_idrss);         /* */
-		fprintf(stderr, "Integral unshared stack size: %ld\n", g_RThreadStop->ru_isrss);         /*  */
-		fprintf(stderr, "Page reclaims (soft page faults): %ld\n", g_RThreadStop->ru_minflt);    /*  */
-		fprintf(stderr, "Page faults (hard page faults): %ld\n", g_RThreadStop->ru_majflt);        /* ) */
-		fprintf(stderr, "# Swap operations: %ld\n\n", g_RThreadStop->ru_nswap);         /* swaps */
-	}
-
 }
 
 double getRealTime() {
