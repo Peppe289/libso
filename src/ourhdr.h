@@ -85,4 +85,6 @@ double getUserTime();
 double TimeDiffmSec(struct timeb Start, struct timeb Stop);
 double TimeDiffuSec(struct timeval Start, struct timeval Stop);
 
+void freeData();
+
 #endif /* __ourhdr_h */
