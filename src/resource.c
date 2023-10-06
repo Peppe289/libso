@@ -183,7 +183,6 @@ double TimeDiffuSec(struct timeval Start, struct timeval Stop)
 /* make free all heap space used runtime */
 void freeData()
 {
-	int i;
 	struct rusage **arr[] = {
 		&g_RChildrenStart,
 		&g_RChildrenStop,
@@ -193,10 +192,10 @@ void freeData()
 		&g_RThreadStop,
 	};
 
-	for (i = 0; i != sizeof(arr) / sizeof(void *); ++i) {
-		if (*arr[i] != NULL) {
-			free(*arr[i]);
-			*arr[i] = NULL;
-		}
-	}
+	size_t arrSize = sizeof(arr) / sizeof(arr[0]);
+
+    for (size_t i = 0; i < arrSize; ++i) {
+        free(*arr[i]);
+        *arr[i] = NULL;
+    }
 }
