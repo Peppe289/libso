@@ -195,7 +195,10 @@ void freeData()
 	size_t arrSize = sizeof(arr) / sizeof(arr[0]);
 
     for (size_t i = 0; i < arrSize; ++i) {
+		if (*arr[i] != NULL) {
         free(*arr[i]);
         *arr[i] = NULL;
     }
+
+  }
 }
