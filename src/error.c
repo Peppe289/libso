@@ -1,128 +1,74 @@
-#include <errno.h>	/* for definition of errno */
-#include <stdarg.h> /* ANSI C header file */
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <limits.h>
-#include "ourhdr.h"
+#include <errno.h>
 
-static void err_doit(int, const char *, va_list);
+#define MAXLINE 1024
 
-/* Non fatal error related to a system call.
- * Print a message and return. */
+static void err_doit(int errnoflag, const char *fmt, va_list ap);
 
-void err_ret(const char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	err_doit(1, fmt, ap);
-	va_end(ap);
-	return;
+void err_ret(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    err_doit(1, fmt, ap);
+    va_end(ap);
 }
 
-/* Fatal error related to a system call.
- * Print a message and terminate. */
-
-void err_sys(const char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	err_doit(1, fmt, ap);
-	va_end(ap);
-	exit(1);
+void err_sys(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    err_doit(1, fmt, ap);
+    va_end(ap);
+    exit(1);
 }
 
-/* Fatal error related to a system call.
- * Print a message, dump core, and terminate. */
-
-void err_dump(const char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	err_doit(1, fmt, ap);
-	va_end(ap);
-	abort(); /* dump core and terminate */
-	exit(1); /* shouldn't get here */
+void err_msg(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    err_doit(0, fmt, ap);
+    va_end(ap);
 }
 
-/* Nonfatal error unrelated to a system call.
- * Print a message and return. */
-
-void err_msg(const char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	err_doit(0, fmt, ap);
-	va_end(ap);
-	return;
+void err_quit(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    err_doit(0, fmt, ap);
+    va_end(ap);
+    exit(1);
 }
 
-/* Fatal error unrelated to a system call.
- * Print a message and terminate. */
+static void err_doit(int errnoflag, const char *fmt, va_list ap) {
+    int errno_save;
+    char buf[MAXLINE];
 
-void err_quit(const char *fmt, ...)
-{
-	va_list ap;
+    errno_save = errno;
 
-	va_start(ap, fmt);
-	err_doit(0, fmt, ap);
-	va_end(ap);
-	exit(1);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+
+    if (errnoflag) {
+        int len = strlen(buf);
+        snprintf(buf + len, sizeof(buf) - len, ": %s", strerror(errno_save));
+    }
+
+    strcat(buf, "\n");
+    fputs(buf, stderr);
+    fflush(NULL);
 }
 
-/* Print a message and return to caller.
- * Caller specifies "errnoflag". */
+char *path_alloc(int *size) {
+    char *ptr;
 
-static void err_doit(int errnoflag, const char *fmt, va_list ap)
-{
-	int errno_save;
-	char buf[MAXLINE];
+    if ((ptr = (char *)malloc((size_t)PATH_MAX)) == NULL)
+        err_sys("malloc error for pathname");
 
-	errno_save = errno; /* value caller might want printed */
-	vsprintf(buf, fmt, ap);
+    if (size != NULL)
+        *size = (int)PATH_MAX;
 
-	if (errnoflag)
-		sprintf(buf + strlen(buf), ": %s", strerror(errno_save));
-
-	strcat(buf, "\n");
-	fflush(stdout); /* in case stdout and stderr are the same */
-	fputs(buf, stderr);
-	fflush(NULL); /* flushes all stdio output streams */
-	return;
+    return ptr;
 }
 
-#ifdef PATH_MAX
-static int pathmax = PATH_MAX;
-#else
-static int pathmax = 0;
-#endif
-
-#define PATH_MAX_GUESS 1024 /* if PATH_MAX is indeterminate */
-							/* we're not guaranteed this is adequate */
-char *path_alloc(int *size)
-/* also return allocated size, if nonnull */
-{
-	char *ptr;
-
-	if (pathmax == 0)
-	{ /* first time through */
-		errno = 0;
-		if ((pathmax = pathconf("/", _PC_PATH_MAX)) < 0)
-		{
-			if (errno == 0)
-				pathmax = PATH_MAX_GUESS; /* it's indeterminate */
-			else
-				err_sys("pathconf error for _PC_PATH_MAX");
-		}
-		else
-			pathmax++; /* add one since it's relative to root */
-	}
-
-	if ((ptr = malloc(pathmax + 1)) == NULL)
-		err_sys("malloc error for pathname");
-
-	if (size != NULL)
-		*size = pathmax + 1;
-	return (ptr);
+void path_free(char *ptr) {
+    free(ptr);
 }
