@@ -7,10 +7,8 @@ enable_testing()
 set(SO_SOURCES src/error.c src/resource.c)
 add_library(so STATIC ${SO_SOURCES})
 
-target_compile_options(so PRIVATE -Wall -Wextra -O3)
-
 if (CMAKE_COMPILER_IS_GNUCC)
-    target_compile_options(so PRIVATE -flto)
+    target_compile_options(so PRIVATE -Wall -Wextra -Ofast -flto)
     set_target_properties(so PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 elseif (MSVC)
     target_compile_options(so PRIVATE /GL)
