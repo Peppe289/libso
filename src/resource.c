@@ -179,3 +179,21 @@ double TimeDiffuSec(struct timeval Start, struct timeval Stop)
 	}
 	return (double)(Stop.tv_sec - Start.tv_sec + (Stop.tv_usec - Start.tv_usec) / 1000000.);
 }
+
+/* make free all heap space used runtime */
+void freeData()
+{
+	int i;
+	void *arr[] = {
+		g_RChildrenStart,
+		g_RChildrenStop,
+		g_RStart,
+		g_RStop,
+		g_RThreadStart,
+		g_RThreadStop,
+	};
+
+	for (i = 0; i != sizeof(arr) / sizeof(void *); ++i)
+		if (arr[i] != NULL)
+			free(arr[i]);
+}
