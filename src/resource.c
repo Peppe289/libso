@@ -184,16 +184,19 @@ double TimeDiffuSec(struct timeval Start, struct timeval Stop)
 void freeData()
 {
 	int i;
-	void *arr[] = {
-		g_RChildrenStart,
-		g_RChildrenStop,
-		g_RStart,
-		g_RStop,
-		g_RThreadStart,
-		g_RThreadStop,
+	struct rusage **arr[] = {
+		&g_RChildrenStart,
+		&g_RChildrenStop,
+		&g_RStart,
+		&g_RStop,
+		&g_RThreadStart,
+		&g_RThreadStop,
 	};
 
-	for (i = 0; i != sizeof(arr) / sizeof(void *); ++i)
-		if (arr[i] != NULL)
-			free(arr[i]);
+	for (i = 0; i != sizeof(arr) / sizeof(void *); ++i) {
+		if (*arr[i] != NULL) {
+			free(*arr[i]);
+			*arr[i] = NULL;
+		}
+	}
 }
